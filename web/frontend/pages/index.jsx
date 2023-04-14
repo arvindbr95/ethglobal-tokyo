@@ -12,20 +12,25 @@ import {
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Toast } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
+import { Web3Button } from '@web3modal/react'
+import { useAccount } from 'wagmi'
 
 // import { trophyImage } from "../assets";
 
 import { ProductsCard } from "../components";
 
 export default function HomePage() {
+  const { address, isConnected } = useAccount();
   const emptyToastProps = { content: null };
   const [isLoading, setIsLoading] = useState(false);
   const fetch = useAuthenticatedFetch();
   const [toastProps, setToastProps] = useState(emptyToastProps);
-  
+
   const toastMarkup = toastProps.content && (
     <Toast {...toastProps} onDismiss={() => setToastProps(emptyToastProps)} />
   );
+
+  // console.log("address is ",address);
 
   const handleUpdateTheme = async () => {
     setIsLoading(true);
@@ -118,6 +123,7 @@ export default function HomePage() {
             </Stack>
           </Card>
         </Layout.Section>
+          <Web3Button />
         {/* <Layout.Section>
           <ProductsCard />
         </Layout.Section> */}
