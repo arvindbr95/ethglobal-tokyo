@@ -77,7 +77,7 @@ export default function HomePage() {
                   <p>
                     {isConnected?
                         <>
-                          <p>Your wallet is connected to <b>{address}</b>!</p>
+                          <p>Connected to wallet <b>{address}</b>!</p>
                         </>:"Please connect your wallet."}
                   </p>
                   {/* <p>
@@ -124,6 +124,30 @@ export default function HomePage() {
                   />
                 </div>
               </Stack.Item> */}
+            </Stack>
+          </Card>
+        </Layout.Section>
+        <Layout.Section>
+          <Card 
+              title="Detected NFTs 🖼️"
+              sectioned
+            >
+            <Stack
+              wrap={false}
+              spacing="extraTight"
+              distribution="trailing"
+              alignment="center"
+            >
+              <Stack.Item fill>
+                <TextContainer spacing="loose">
+                  <p>
+                    {
+                      !isConnected?
+                      "Please connect your wallet to view detected apes.":"NFTs:"
+                    }
+                  </p>
+                  </TextContainer>
+              </Stack.Item>
             </Stack>
           </Card>
         </Layout.Section>
