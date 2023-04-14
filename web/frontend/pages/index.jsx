@@ -12,7 +12,7 @@ import {
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Toast } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
-import { Web3Button } from '@web3modal/react'
+import { Web3Button, useWeb3Modal } from '@web3modal/react'
 import { useAccount } from 'wagmi'
 
 // import { trophyImage } from "../assets";
@@ -25,6 +25,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const fetch = useAuthenticatedFetch();
   const [toastProps, setToastProps] = useState(emptyToastProps);
+  const { open } = useWeb3Modal()
 
   const toastMarkup = toastProps.content && (
     <Toast {...toastProps} onDismiss={() => setToastProps(emptyToastProps)} />
@@ -57,12 +58,12 @@ export default function HomePage() {
         <Layout.Section>
           {toastMarkup}
           <Card 
-            title="Update Store Theme 🎨"
+            title="Connect Wallet 💰"
             sectioned
             primaryFooterAction={{
-              content: "Update Theme",
-              onAction: handleUpdateTheme,
-              loading: isLoading,
+              content: "Connect Wallet",
+              onAction: open,
+              disabled: isConnected
             }}
           >
             <Stack
@@ -74,7 +75,10 @@ export default function HomePage() {
               <Stack.Item fill>
                 <TextContainer spacing="loose">
                   <p>
-                    Please click the button below to update your theme.
+                    {isConnected?
+                        <>
+                          <p>Your wallet is connected to <b>{address}</b>!</p>
+                        </>:"Please connect your wallet."}
                   </p>
                   {/* <p>
                     Your app is ready to explore! It contains everything you
@@ -123,10 +127,33 @@ export default function HomePage() {
             </Stack>
           </Card>
         </Layout.Section>
-          <Web3Button />
-        {/* <Layout.Section>
-          <ProductsCard />
-        </Layout.Section> */}
+        <Layout.Section>
+          <Card 
+              title="Update Store Theme 🎨"
+              sectioned
+              primaryFooterAction={{
+                content: "Update Theme",
+                onAction: handleUpdateTheme,
+                loading: isLoading,
+                disabled: !isConnected
+              }}
+            >
+            <Stack
+              wrap={false}
+              spacing="extraTight"
+              distribution="trailing"
+              alignment="center"
+            >
+              <Stack.Item fill>
+                <TextContainer spacing="loose">
+                  <p>
+                    Click the button below to update your theme.
+                  </p>
+                  </TextContainer>
+              </Stack.Item>
+            </Stack>
+          </Card>
+        </Layout.Section>
       </Layout>
     </Page>
   );
