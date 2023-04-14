@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   Page,
@@ -9,18 +10,56 @@ import {
   Heading,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
+import { Toast } from "@shopify/app-bridge-react";
+import { useAuthenticatedFetch } from "../hooks";
 
-import { trophyImage } from "../assets";
+// import { trophyImage } from "../assets";
 
 import { ProductsCard } from "../components";
 
 export default function HomePage() {
+  const emptyToastProps = { content: null };
+  const [isLoading, setIsLoading] = useState(false);
+  const fetch = useAuthenticatedFetch();
+  const [toastProps, setToastProps] = useState(emptyToastProps);
+  
+  const toastMarkup = toastProps.content && (
+    <Toast {...toastProps} onDismiss={() => setToastProps(emptyToastProps)} />
+  );
+
+  const handleUpdateTheme = async () => {
+    setIsLoading(true);
+    const response = await fetch("/api/update/theme");
+  
+    if (response.ok) {
+      // await refetchProductCount();
+      console.log("response", response);
+      setToastProps({ content: "Theme updated!" });
+      setIsLoading(false);
+    } else {
+      setIsLoading(false);
+      setToastProps({
+        content: "There was an error updating theme",
+        error: true,
+      });
+    }
+  };
+  
   return (
     <Page narrowWidth>
-      <TitleBar title="App name" primaryAction={null} />
+      <TitleBar title="Apeify Dashboard" primaryAction={null} />
       <Layout>
         <Layout.Section>
-          <Card sectioned>
+          {toastMarkup}
+          <Card 
+            title="Update Store Theme 🎨"
+            sectioned
+            primaryFooterAction={{
+              content: "Update Theme",
+              onAction: handleUpdateTheme,
+              loading: isLoading,
+            }}
+          >
             <Stack
               wrap={false}
               spacing="extraTight"
@@ -29,8 +68,10 @@ export default function HomePage() {
             >
               <Stack.Item fill>
                 <TextContainer spacing="loose">
-                  <Heading>Nice work on building a Shopify app 🎉</Heading>
                   <p>
+                    Please click the button below to update your theme.
+                  </p>
+                  {/* <p>
                     Your app is ready to explore! It contains everything you
                     need to get started including the{" "}
                     <Link url="https://polaris.shopify.com/" external>
@@ -62,10 +103,10 @@ export default function HomePage() {
                       this Shopify tutorial
                     </Link>{" "}
                     📚{" "}
-                  </p>
+                  </p> */}
                 </TextContainer>
               </Stack.Item>
-              <Stack.Item>
+              {/* <Stack.Item>
                 <div style={{ padding: "0 20px" }}>
                   <Image
                     source={trophyImage}
@@ -73,13 +114,13 @@ export default function HomePage() {
                     width={120}
                   />
                 </div>
-              </Stack.Item>
+              </Stack.Item> */}
             </Stack>
           </Card>
         </Layout.Section>
-        <Layout.Section>
+        {/* <Layout.Section>
           <ProductsCard />
-        </Layout.Section>
+        </Layout.Section> */}
       </Layout>
     </Page>
   );
