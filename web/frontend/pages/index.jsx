@@ -71,6 +71,11 @@ export default function HomePage() {
     }
   };
 
+  const handleSelect = (index) => {
+    console.log("index", index)
+    index == selectedNft ? setSelectedNft(0) : setSelectedNft(index)
+  }
+
   const fetchNFTs = async () => {
     setIsAirStackLoading(true)
     console.log("fetching NFTs")
@@ -186,7 +191,7 @@ export default function HomePage() {
                             return(<Stack.Item key={index}>
                               <Image style={{marginBottom: 8}} height={150} src={nft.tokenNfts.contentValue.image.small}></Image>
                               <p>Token ID: #{nft.tokenId}</p>
-                              <RadioButton label="Select" />
+                              <RadioButton checked={index==selectedNft} onChange={() => handleSelect(index)} label="Select" />
                             </Stack.Item>)
                           })
                         }
