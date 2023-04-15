@@ -8,6 +8,8 @@ import {
   Stack,
   Link,
   Heading,
+  Spinner,
+  RadioButton
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Toast } from "@shopify/app-bridge-react";
@@ -24,10 +26,13 @@ export default function HomePage() {
   const { address, isConnected } = useAccount();
   const emptyToastProps = { content: null };
   const [isLoading, setIsLoading] = useState(false);
+  const [isAirstackLoading, setIsAirStackLoading] = useState(false);
   const fetch = useAuthenticatedFetch();
   const [toastProps, setToastProps] = useState(emptyToastProps);
   const { open } = useWeb3Modal()
-
+  const [nfts, setNfts] = useState(null)
+  const [selectedNft, setSelectedNft] = useState(0)
+  // console.log("nfts", nfts)
 
   // Initializing apollo Client 🚀
   const client = new ApolloClient({
@@ -42,7 +47,7 @@ export default function HomePage() {
 
   useEffect(() => {
     if (isConnected) {
-      // fetchNFTs();
+      fetchNFTs();
     }
   }, [isConnected])
 
@@ -67,27 +72,38 @@ export default function HomePage() {
   };
 
   const fetchNFTs = async () => {
+    setIsAirStackLoading(true)
     console.log("fetching NFTs")
     const query = gql`
         query MyQuery {
           TokenBalances(
             input: {
               filter: {
-                tokenAddress: { _eq: "0xe8a858b29311652f7e2170118fbead34d097e88a"}
-                owner: { _eq: $address }
+                tokenAddress: { _eq: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d"}
+                owner: { _eq: "0xC98C4680b7D97669d4D7F4D634a63668A2d48A84" }
                 tokenType: { _in: [ERC1155, ERC721] }
               }
-              blockchain: polygon
+              blockchain: ethereum
               limit: 10
             }
           ) {
             TokenBalance {
               tokenAddress
+              tokenId
               amount
               tokenType
               tokenNfts {
+                contentValue {
+                  image {
+                    small
+                  }
+                }
                 metaData {
-                  name
+                  attributes {
+                    trait_type
+                    value
+                  }
+                  image
                 }
               }
               owner {
@@ -103,7 +119,10 @@ export default function HomePage() {
           address: address,
       },
     })
+    setIsAirStackLoading(false)
     console.log("response", response);
+    setNfts(response.data.TokenBalances.TokenBalance)
+    // console.log("nfts", response.data.TokenBalances);
   }
   
   return (
@@ -152,12 +171,28 @@ export default function HomePage() {
             >
               <Stack.Item fill>
                 <TextContainer spacing="loose">
-                  <p>
+                  <p style={{marginBottom:16}}>
                     {
                       !isConnected?
                       "Please connect your wallet to view detected apes.":"NFTs:"
                     }
                   </p>
+                  
+                    {
+                      isConnected?isAirstackLoading?<Spinner size="small"/>:<Stack>
+                        {
+                          nfts?.map((nft, index) => {
+                            // console.log('nft', nft);
+                            return(<Stack.Item key={index}>
+                              <Image style={{marginBottom: 8}} height={150} src={nft.tokenNfts.contentValue.image.small}></Image>
+                              <p>Token ID: #{nft.tokenId}</p>
+                              <RadioButton label="Select" />
+                            </Stack.Item>)
+                          })
+                        }
+                      </Stack>:<></>
+                    }
+                  
                   </TextContainer>
               </Stack.Item>
             </Stack>
