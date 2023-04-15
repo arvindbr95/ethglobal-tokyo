@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   Page,
@@ -14,6 +14,7 @@ import { Toast } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
 import { Web3Button, useWeb3Modal } from '@web3modal/react'
 import { useAccount } from 'wagmi'
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client/core"
 
 // import { trophyImage } from "../assets";
 
@@ -27,9 +28,23 @@ export default function HomePage() {
   const [toastProps, setToastProps] = useState(emptyToastProps);
   const { open } = useWeb3Modal()
 
+
+  // Initializing apollo Client 🚀
+  const client = new ApolloClient({
+      uri: "https://api.airstack.xyz/gql",
+      cache: new InMemoryCache(),
+      headers: { Authorization: "bb3c3769a010477caa281aaea6d64a8a" },
+  })
+  
   const toastMarkup = toastProps.content && (
     <Toast {...toastProps} onDismiss={() => setToastProps(emptyToastProps)} />
   );
+
+  useEffect(() => {
+    if (isConnected) {
+      // fetchNFTs();
+    }
+  }, [isConnected])
 
   // console.log("address is ",address);
 
@@ -50,6 +65,46 @@ export default function HomePage() {
       });
     }
   };
+
+  const fetchNFTs = async () => {
+    console.log("fetching NFTs")
+    const query = gql`
+        query MyQuery {
+          TokenBalances(
+            input: {
+              filter: {
+                tokenAddress: { _eq: "0xe8a858b29311652f7e2170118fbead34d097e88a"}
+                owner: { _eq: $address }
+                tokenType: { _in: [ERC1155, ERC721] }
+              }
+              blockchain: polygon
+              limit: 10
+            }
+          ) {
+            TokenBalance {
+              tokenAddress
+              amount
+              tokenType
+              tokenNfts {
+                metaData {
+                  name
+                }
+              }
+              owner {
+                addresses
+              }
+            }
+          }
+        }
+      `
+    const response = await client.query({
+      query,
+      variables: {
+          address: address,
+      },
+    })
+    console.log("response", response);
+  }
   
   return (
     <Page narrowWidth>
@@ -74,56 +129,13 @@ export default function HomePage() {
             >
               <Stack.Item fill>
                 <TextContainer spacing="loose">
-                  <p>
                     {isConnected?
                         <>
                           <p>Connected to wallet <b>{address}</b>!</p>
-                        </>:"Please connect your wallet."}
-                  </p>
-                  {/* <p>
-                    Your app is ready to explore! It contains everything you
-                    need to get started including the{" "}
-                    <Link url="https://polaris.shopify.com/" external>
-                      Polaris design system
-                    </Link>
-                    ,{" "}
-                    <Link url="https://shopify.dev/api/admin-graphql" external>
-                      Shopify Admin API
-                    </Link>
-                    , and{" "}
-                    <Link
-                      url="https://shopify.dev/apps/tools/app-bridge"
-                      external
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    UI library and components.
-                  </p>
-                  <p>
-                    Ready to go? Start populating your app with some sample
-                    products to view and test in your store.{" "}
-                  </p>
-                  <p>
-                    Learn more about building out your app in{" "}
-                    <Link
-                      url="https://shopify.dev/apps/getting-started/add-functionality"
-                      external
-                    >
-                      this Shopify tutorial
-                    </Link>{" "}
-                    📚{" "}
-                  </p> */}
+                        </>:<p>Please connect your wallet.</p>
+                      }
                 </TextContainer>
               </Stack.Item>
-              {/* <Stack.Item>
-                <div style={{ padding: "0 20px" }}>
-                  <Image
-                    source={trophyImage}
-                    alt="Nice work on building a Shopify app"
-                    width={120}
-                  />
-                </div>
-              </Stack.Item> */}
             </Stack>
           </Card>
         </Layout.Section>

@@ -12,6 +12,7 @@
     "node": ">= 12.16"
   },
   "dependencies": {
+    "@apollo/client": "^3.7.12",
     "@shopify/app-bridge": "^3.1.0",
     "@shopify/app-bridge-react": "^3.1.0",
     "@shopify/app-bridge-utils": "^3.1.0",
@@ -20,6 +21,7 @@
     "@web3modal/ethereum": "^2.3.0",
     "@web3modal/react": "^2.3.0",
     "ethers": "^5.7.2",
+    "graphql": "^16.6.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-query": "^3.34.19",
