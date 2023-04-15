@@ -7,6 +7,8 @@ import serveStatic from "serve-static";
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
+import axios from "axios";
+import fs from "fs";
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -59,7 +61,23 @@ app.get("/api/products/create", async (_req, res) => {
 
 app.get("/api/update/theme", async (_req, res) => {
 	console.log("received request to update Theme.");
-    
+	// await uploadTheme(
+	// 	"bayc-1",
+	// 	"../themes/bayc-theme.zip"
+	// );
+    try {
+        const theme = new shopify.api.rest.Theme({session: res.locals.shopify.session});
+        // theme.name = "bayc-1";
+        // theme.src = "https://metafi-mvp.s3.amazonaws.com/images/bayc-theme.zip";
+        theme.id = 147626524950;
+        theme.role = "main";
+        await theme.save({
+            update: true,
+        });
+    } catch (e) {
+		console.error(`Error uploading theme: ${e.message}`);
+    }
+
 	res.status(200).send({ success: true });
 });
 
