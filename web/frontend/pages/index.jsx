@@ -118,7 +118,7 @@ export default function HomePage() {
           }
         }
       `
-    const response = await client.query({
+    const response = await client.query({ // Airstack is being used to fetch the NFT image data, token details and the traits based on which we will decide the theme of the Shopify template
       query,
       variables: {
           address: address,
